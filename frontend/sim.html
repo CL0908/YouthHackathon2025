@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Bubbly · Algorithm Simulation</title>
+<style>
+  :root{
+    --blue:#FBE6AC;  /* soft yellow */
+    --pink:#FAEEE5;  /* light pink */
+    --lav:#FAEEE5;   /* same as pink per request */
+    --mint:#94DBF5;  /* cyan */
+    --peach:#FFADAD; /* salmon */
+    --ink:#20201f; --sub:#5c5b59; --card:#fff; --shadow:0 8px 28px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    color:var(--ink);
+    background:linear-gradient(160deg, var(--pink) 0%, #fff 40%, var(--blue) 100%);
+    min-height:100vh;
+  }
+  .phone{max-width:460px;margin:0 auto}
+
+  /* Top bar */
+  .topbar{position:sticky;top:0;z-index:5;backdrop-filter:blur(8px);
+    background:rgba(255,255,255,.6); padding:14px 16px; display:flex; align-items:center; gap:12px}
+  .logo{font-weight:800;font-size:18px;letter-spacing:.3px}
+  .spacer{flex:1}
+  .avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid rgba(0,0,0,.06)}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+
+  /* Cards */
+  .card{background:var(--card); border-radius:26px; box-shadow:var(--shadow)}
+  .hero{margin:16px; padding:16px 16px 8px; position:relative}
+  .title{font-size:24px; font-weight:800; margin:4px 0 4px}
+  .sub{font-size:12px; color:var(--sub); margin-bottom:8px}
+
+  /* Dials (八仙) */
+  .controls{margin:16px; padding:10px 14px}
+  .dial{display:grid; grid-template-columns:132px 1fr 42px; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px dashed #eee}
+  .dial:last-child{border-bottom:0}
+  .dial label{font-size:12px; color:#333; font-weight:800}
+  .dial input[type="range"]{width:100%}
+  .dial .val{font-size:12px; color:#666; text-align:right}
+  .btns{display:flex; gap:8px; padding:8px 10px 0}
+  .btn{padding:8px 12px; border-radius:999px; border:1px solid #eee; background:#fff; cursor:pointer; font-size:12px}
+  .btn:hover{box-shadow:0 4px 12px rgba(0,0,0,.06)}
+
+  /* Feed */
+  .feedWrap{margin:0 16px 120px; display:grid; gap:10px}
+  .post{background:#fff; border:1px solid #eee; border-radius:18px; padding:12px; box-shadow:var(--shadow)}
+  .postHead{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  .pfp{width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid var(--lav);flex:0 0 28px;background:#fff}
+  .pfp img{width:100%;height:100%;object-fit:cover}
+  .name{font-weight:800; font-size:14px}
+  .meta{margin-left:auto; font-size:11px; color:#888}
+  .text{font-size:14px; line-height:1.4}
+  .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+  .tag{font-size:11px; padding:6px 8px; border-radius:999px; border:1px solid #eee; background:#fafafa}
+  .tag.badge-yellow{background:var(--blue)}
+  .tag.badge-pink{background:var(--pink)}
+  .tag.badge-mint{background:var(--mint)}
+  .tag.badge-peach{background:var(--peach)}
+  .why{font-size:11px; color:#666; margin-top:6px}
+
+  /* Bottom nav */
+  .tabbar{position:fixed; left:0; right:0; bottom:0; background:#ffffffcc; backdrop-filter:blur(6px);
+    border-top:1px solid #eee; display:grid; grid-template-columns:repeat(3,1fr); padding:10px 8px; gap:8px}
+  .tab{display:grid; place-items:center; gap:4px; color:#5b5b5b; font-size:12px; text-decoration:none}
+  .tab.active{color:#0d3a66}
+  .tab svg{width:24px;height:24px}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="logo">BUBLENZ</div>
+      <div class="spacer"></div>
+      <div class="avatar"><img src="bobo.png" alt="Bobo"></div>
+    </div>
+
+    <!-- Header -->
+    <section class="card hero">
+      <div class="title">Algorithm Simulation</div>
+      <div class="sub">Adjust the 8 sliders to see how your feed changes instantly</div>
+    </section>
+
+    <!-- 八仙控制 -->
+    <section class="card controls">
+      <!-- 八仙：新鲜度、正向情绪、争议度、朋友优先、新闻优先、短内容优先、科技偏好、健康/身心偏好 -->
+      <div class="dial"><label>Novelty </label>        <input type="range" min="0" max="100" value="60" data-key="novelty"><div class="val">60</div></div>
+      <div class="dial"><label>Positivity </label>       <input type="range" min="0" max="100" value="30" data-key="positivity"><div class="val">30</div></div>
+      <div class="dial"><label>Controversy </label>       <input type="range" min="0" max="100" value="20" data-key="controversy"><div class="val">20</div></div>
+      <div class="dial"><label>News-first </label>        <input type="range" min="0" max="100" value="50" data-key="news"><div class="val">50</div></div>
+      <div class="dial"><label>Short-form </label>      <input type="range" min="0" max="100" value="55" data-key="short"><div class="val">55</div></div>
+      <div class="dial"><label>Tech bias </label>     <input type="range" min="0" max="100" value="35" data-key="tech"><div class="val">35</div></div>
+      <div class="dial"><label>Wellness bias</label>    <input type="range" min="0" max="100" value="25" data-key="wellness"><div class="val">25</div></div>
+
+      <div class="btns">
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="balancedBtn">Balanced</button>
+        <button class="btn" id="doomscrollBtn">Doomscroll</button>
+        <button class="btn" id="calmBtn">Calm Mind</button>
+      </div>
+    </section>
+
+    <!-- Feed（会随权重实时变化） -->
+    <section class="feedWrap" id="feed"></section>
+
+    <!-- Bottom nav -->
+    <nav class="tabbar">
+      <a class="tab" href="main.html" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/>
+        </svg><span>Home</span>
+      </a>
+      <a class="tab" href="chat.html" title="Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+        </svg><span>Chat</span>
+      </a>
+      <a class="tab active" href="piechart.html" title="Analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>
+        </svg><span>Analytics</span>
+      </a>
+    </nav>
+  </div>
+
+<script>
+/* ========= 内置示例 posts（教育用途） =========
+   字段：
+   - id
+   - authorType: 'friend' | 'news'
+   - category:   'tech' | 'wellness' | 'world' | 'edu' | 'ent'
+   - sentiment:  0..1（正向）
+   - controversy:0..1（争议）
+   - lengthSec:  秒（短内容 < 40s）
+   - freshness:  0..1（新鲜度）
+   - title / text
+*/
+const POSTS = [
+  {id:1, authorType:'friend', category:'wellness', sentiment:0.8, controversy:0.1, lengthSec:25, freshness:0.9,
+  title:'Wanna try 4-7-8 breathing tonight?', text:'I’ve practiced for a week, I fall asleep faster now…'},
+{id:2, authorType:'news', category:'world', sentiment:0.2, controversy:0.6, lengthSec:90, freshness:0.7,
+  title:'Multiple countries dispute over trade issues again', text:'Foreign ministry and others responded…'},
+{id:3, authorType:'news', category:'tech', sentiment:0.6, controversy:0.3, lengthSec:35, freshness:0.95,
+  title:'New benchmark for open-source models released', text:'Smaller parameters but strong in reasoning…'},
+{id:4, authorType:'friend', category:'ent', sentiment:0.9, controversy:0.1, lengthSec:15, freshness:0.6,
+  title:'Short video: my cat learned to shake hands!', text:'So cute hahaha~'},
+{id:5, authorType:'news', category:'world', sentiment:0.3, controversy:0.8, lengthSec:120, freshness:0.85,
+  title:'Regional conflict escalates', text:'Analysts say the situation may…'},
+{id:6, authorType:'friend', category:'edu', sentiment:0.7, controversy:0.2, lengthSec:50, freshness:0.4,
+  title:'Exam week survival kit', text:'I made a revision checklist to share…'},
+{id:7, authorType:'news', category:'tech', sentiment:0.5, controversy:0.5, lengthSec:45, freshness:0.8,
+  title:'Chip production capacity and pricing', text:'Analysis of supply, demand, and future trends…'},
+{id:8, authorType:'friend', category:'wellness', sentiment:0.6, controversy:0.2, lengthSec:20, freshness:0.5,
+  title:'5-minute yoga sequence', text:'Really effective for neck and shoulder relaxation…'},
+{id:9, authorType:'news', category:'ent', sentiment:0.7, controversy:0.4, lengthSec:30, freshness:0.65,
+  title:'Box office hits record high', text:'Several summer movies performed strongly…'},
+{id:10, authorType:'friend', category:'tech', sentiment:0.4, controversy:0.4, lengthSec:12, freshness:0.92,
+  title:'I hooked my class notes to GPT', text:'It auto-summarizes and generates practice questions…'},
+{id:11, authorType:'news', category:'wellness', sentiment:0.8, controversy:0.2, lengthSec:80, freshness:0.55,
+  title:'Study: 10-minute walk', text:'Can significantly improve mood and cognition…'},
+{id:12, authorType:'friend', category:'world', sentiment:0.3, controversy:0.7, lengthSec:18, freshness:0.88,
+  title:'Forum turned into an argument', text:'Completely polarized views on the same topic…'},
+{id:13, authorType:'news', category:'edu', sentiment:0.6, controversy:0.2, lengthSec:150, freshness:0.45,
+  title:'University curriculum reform', text:'General education categories adjusted…'},
+{id:14, authorType:'friend', category:'ent', sentiment:0.5, controversy:0.3, lengthSec:8, freshness:0.97,
+  title:'8-second challenge: draw me in one sentence', text:'Let’s play!'}
+
+];
+
+const COLORS = {
+  tech:     'badge-mint',
+  wellness: 'badge-pink',
+  world:    'badge-yellow',
+  edu:      'badge-peach',
+  ent:      ''
+};
+
+/* ========= 八仙权重 ========= */
+const DEFAULT_W = {
+  novelty:60, positivity:30, controversy:20, friends:40,
+  news:50, short:55, tech:35, wellness:25
+};
+let W = loadWeights();
+
+function loadWeights(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('sim_weights')||'{}');
+    return {...DEFAULT_W, ...saved};
+  }catch(e){ return {...DEFAULT_W}; }
+}
+function saveWeights(){ localStorage.setItem('sim_weights', JSON.stringify(W)); }
+
+/* ========= 打分模型（教育模拟用，便于理解） =========
+   score = Σ (权重 * 特征)
+   - 新鲜度         → freshness
+   - 正向           → sentiment
+   - 争议（可正向/负向）：这里理解为“想看刺激”，直接用 controversy
+   - 朋友 vs 新闻    → friendBoost/newsBoost（互相独立，用户可同时加权）
+   - 短内容          → shortBoost
+   - 科技/身心偏好    → 分类加权
+*/
+function scorePost(p){
+  // 归一化权重到 0..1
+  const w = {};
+  Object.keys(W).forEach(k => w[k] = W[k]/100);
+
+  const isFriend = p.authorType === 'friend' ? 1 : 0;
+  const isNews   = p.authorType === 'news'   ? 1 : 0;
+  const isShort  = p.lengthSec <= 40 ? 1 : 0;
+
+  const catTech = p.category === 'tech'     ? 1 : 0;
+  const catWell = p.category === 'wellness' ? 1 : 0;
+
+  // 基础特征
+  let s =
+    w.novelty    * p.freshness +
+    w.positivity * p.sentiment +
+    w.controversy* p.controversy +
+    w.friends    * isFriend +
+    w.news       * isNews +
+    w.short      * isShort +
+    w.tech       * catTech +
+    w.wellness   * catWell;
+
+  // 轻度惩罚：过长内容在“短内容优先”强时降低一点
+  if (!isShort && w.short > 0.6) s *= 0.9;
+
+  return s;
+}
+
+/* ========= 渲染 ========= */
+const feedEl = document.getElementById('feed');
+
+function render(){
+  // 排序 & 选择前 N（演示：前 10）
+  const sorted = POSTS.slice()
+    .map(p => ({...p, _score: scorePost(p)}))
+    .sort((a,b)=> b._score - a._score)
+    .slice(0, 10);
+
+  feedEl.innerHTML = '';
+  sorted.forEach(p=>{
+    const el = document.createElement('article');
+    el.className = 'post';
+    el.innerHTML = `
+      <div class="postHead">
+        <div class="pfp"><img src="bobo.png" alt=""></div>
+        <div class="name">${p.authorType === 'friend' ? 'Your friend' : 'News · ' + p.category.toUpperCase()}</div>
+        <div class="meta">${Math.round(p.freshness*100)}% fresh • ${p.lengthSec}s</div>
+      </div>
+      <div class="text"><strong>${p.title}</strong> — ${p.text}</div>
+      <div class="tags">
+        <span class="tag ${COLORS[p.category]}">${p.category}</span>
+        ${p.authorType==='friend' ? '<span class="tag">friend</span>' : '<span class="tag">news</span>'}
+        ${p.lengthSec<=40 ? '<span class="tag">short</span>' : '<span class="tag">long</span>'}
+        ${p.controversy>0.55 ? '<span class="tag">hot/controversial</span>' : ''}
+        ${p.sentiment>0.7 ? '<span class="tag">positive</span>' : ''}
+      </div>
+      <div class="why">why shown · score=${p._score.toFixed(2)} · weights: ${explainWhy(p)}</div>
+    `;
+    feedEl.appendChild(el);
+  });
+}
+
+function explainWhy(p){
+  const marks = [];
+  if (W.novelty>50 && p.freshness>0.7) marks.push('novelty');
+  if (W.positivity>50 && p.sentiment>0.6) marks.push('positivity');
+  if (W.controversy>40 && p.controversy>0.5) marks.push('controversy');
+  if (W.friends>40 && p.authorType==='friend') marks.push('friends-first');
+  if (W.news>40 && p.authorType==='news') marks.push('news-first');
+  if (W.short>50 && p.lengthSec<=40) marks.push('short-form');
+  if (W.tech>30 && p.category==='tech') marks.push('tech');
+  if (W.wellness>30 && p.category==='wellness') marks.push('wellness');
+  return marks.join(', ') || 'balanced';
+}
+
+/* ========= 绑定滑杆 ========= */
+document.querySelectorAll('.dial').forEach(row=>{
+  const input = row.querySelector('input');
+  const key = input.dataset.key;
+  const val = row.querySelector('.val');
+  input.value = W[key];
+  val.textContent = W[key];
+  input.addEventListener('input', ()=>{
+    W[key] = Number(input.value);
+    val.textContent = input.value;
+    saveWeights();
+    render();
+  });
+});
+
+/* ========= Presets ========= */
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  W = {...DEFAULT_W}; saveWeights(); syncDials(); render();
+});
+document.getElementById('balancedBtn').addEventListener('click', ()=>{
+  W = {novelty:50, positivity:50, controversy:20, friends:50, news:50, short:50, tech:50, wellness:50};
+  saveWeights(); syncDials(); render();
+});
+document.getElementById('doomscrollBtn').addEventListener('click', ()=>{
+  W = {novelty:70, positivity:10, controversy:80, friends:30, news:70, short:70, tech:40, wellness:10};
+  saveWeights(); syncDials(); render();
+});
+document.getElementById('calmBtn').addEventListener('click', ()=>{
+  W = {novelty:40, positivity:80, controversy:5, friends:60, news:30, short:40, tech:30, wellness:80};
+  saveWeights(); syncDials(); render();
+});
+
+function syncDials(){
+  document.querySelectorAll('.dial').forEach(row=>{
+    const input = row.querySelector('input');
+    const key = input.dataset.key;
+    const val = row.querySelector('.val');
+    input.value = W[key]; val.textContent = W[key];
+  });
+}
+
+/* ========= 启动 ========= */
+window.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

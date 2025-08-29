@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Bubbly · Home</title>
+  <style>
+    :root {
+      --blue:   #FBE6AC;  
+      --pink:   #FAEEE5;
+      --lav:    #FAEEE5;
+      --mint:   #94DBF5;
+      --peach:  #FFADAD;
+
+      --ink:    #2B2B2B;
+      --sub:    #5b5b5b;
+      --bg:     #fff8f4;
+      --card:   #ffffff;
+      --shadow: 0 6px 24px rgba(0,0,0,.06);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      color: var(--ink);
+      /* background image with gradient overlay */
+      background:
+        linear-gradient(135deg, var(--mint) 0%, #95c7b3 30%, var(--blue) 60%, #4f7ee4 100%),
+        url('back.jpg') no-repeat center/cover;
+      /* blend the gradient and image so the image shows through with reduced intensity */
+      background-blend-mode: overlay;
+      min-height: 100vh;
+    }
+
+    /* Containers */
+    .phone { max-width: 460px; margin: 0 auto; }
+    .card { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); }
+    .grid { display: grid; gap: 16px; }
+    .section { padding: 20px 16px 120px; }
+
+    /* Top bar */
+    .topbar { position: sticky; top: 0; z-index: 5; backdrop-filter: blur(6px);
+              background: rgba(255,255,255,.45); padding: 16px 20px;
+              display: flex; align-items: center; gap: 12px; }
+    .logo { font-weight: 800; font-size: 20px; letter-spacing: .3px; color:#1f3b4a; }
+    .spacer { flex: 1; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--mint);
+              display:grid; place-items:center; font-weight:700; color:#245; }
+
+    /* Hero */
+    .hero { margin: 16px; padding: 20px; display: grid; grid-template-columns: 100px 1fr;
+            gap: 16px; align-items: center; }
+    .bobo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid var(--lav);
+      position: relative;
+      background: #fff;
+    }
+    /*
+      Ensure both the base and accessory images fill the circular container.  The
+      accessory image is absolutely positioned so it overlays the base.
+    */
+    #boboBase,
+    #boboAcc {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #boboAcc {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    /* Face overlay behaves similarly to the accessory overlay.  It
+       overlays on top of the base and accessory layers but remains
+       non-interactive. */
+    #boboFace {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /*
+      Legacy class used on Bobo images.  This ensures any image with the
+      'bobo-img' class also fills its parent container and crops appropriately.
+    */
+    .bobo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero h2 { margin: 0 0 10px; font-size: 22px; color:#123; }
+    .hero p { margin: 0; color: var(--sub); font-size: 14px; }
+    .actions { margin-top: 12px; display:flex; gap:10px; }
+    .btn { border: 0; border-radius: 999px; padding: 12px 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.06); font-size: 14px; }
+    .btn-primary { background: var(--peach); color: #fff; }
+    .btn-ghost { background: #fff5f5; color: #7a3a16; }
+
+    /* Segmented nav */
+    .segment { margin: 20px 16px; background: #fff; border-radius: 18px; box-shadow: var(--shadow);
+               display: grid; grid-template-columns: repeat(3, 1fr); overflow: hidden; }
+    .seg-btn { padding: 14px 6px; text-align: center; font-weight: 600; color: var(--sub);
+               cursor: pointer; user-select:none; display:grid; place-items:center; gap:8px; font-size: 14px; }
+    .seg-btn.active { background: var(--blue); color: #093a64; }
+
+    /* Trip card */
+    .trip { background: #fff; border-radius: 20px; box-shadow: var(--shadow); padding:16px;
+            display:grid; grid-template-columns: 70px 1fr auto; gap:14px; align-items:center; }
+    .trip .icon { width: 70px; height: 70px; border-radius: 16px; display:grid; place-items:center; font-size: 26px;
+                  background: var(--pink); color:#fff; }
+    .trip .meta h4 { margin: 0 0 6px; font-size: 18px; }
+    .trip .meta p { margin: 0; color: var(--sub); font-size: 13px; }
+    .status { padding: 8px 12px; background: #eef7f2; border-radius: 999px; font-size: 13px; color:#116b24; }
+
+    /* Hint pill */
+    .hint { margin: 20px 16px; background: var(--blue); color:#4649f0; border-radius: 999px; padding: 12px 16px; font-weight: 600; display:flex; align-items:center; gap:10px; font-size: 14px; }
+
+    /* Dress-up shop */
+    .shop { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .item { padding: 16px; border-radius: 18px; background:#fff; box-shadow: var(--shadow); display:grid; gap:10px; }
+    .item .hat { width: 100%; aspect-ratio: 1.6/1; border-radius: 12px;
+                 background: repeating-linear-gradient(135deg, var(--lav), var(--lav) 12px, #efe4ef 12px, #efe4ef 24px); }
+    .item .price { font-weight:700; color:#0d3a66; font-size: 14px; }
+
+    /* Bottom tab bar */
+    .tabbar { position: fixed; left: 0; right: 0; bottom: 0; background: #ffffffcc; backdrop-filter: blur(6px);
+              border-top: 1px solid #eee; display: grid; grid-template-columns: repeat(3, 1fr); padding: 10px 8px; gap: 8px; }
+    .tab { display: grid; place-items: center; gap: 4px; color: #5b5b5b; font-size: 12px; text-decoration: none; }
+    .tab.active { color: #093a64; }
+    .tab svg { width: 24px; height: 24px; }
+
+    /* Bubble icon in tasks */
+    .bubble-icon { width: 18px; height: 18px; vertical-align: middle; margin-right: 6px; border-radius:50%; object-fit:cover; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="topbar">
+      <div class="logo">BUBLENZ</div>
+      <div class="spacer"></div>
+    </div>
+
+    <section class="hero card">
+      <div class="bobo">
+        <!-- Base and accessory layers for Bobo.  The accessory image sits on top of the base. -->
+        <img id="boboBase" src="bobo.png" alt="Bobo" class="bobo-img">
+        <!-- Face layer sits above the base color but below the accessory -->
+        <img id="boboFace" src="" alt="Face" class="bobo-img">
+        <img id="boboAcc" src="" alt="Accessory" class="bobo-img">
+      </div>
+      <div>
+        <h2>Bobo</h2>
+        <p>Points: 1000</p>
+        <div class="actions">
+          <button class="btn btn-primary" id="startJourney">Start Journey</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="segment" id="segment">
+      <div class="seg-btn active" data-tab="trips">Trips</div>
+      <div class="seg-btn" data-tab="achv">Achievements</div>
+      <div class="seg-btn" data-tab="dress">Dress-up</div>
+    </nav>
+
+    <div class="hint">🔓 Unlock delete & edit journey features</div>
+
+    <main class="section">
+      <!-- Trips -->
+      <div id="tab-trips" class="grid">
+        <div class="trip">
+          <div class="icon">
+            <img src="pixel.png" alt="Journey Icon" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+          </div>
+          <div class="meta">
+            <h4>New Journey · Bobo</h4>
+            <p id="liveTimer">Live · 00:00:00</p>
+          </div>
+          <div class="status">Idle</div>
+        </div>
+      </div>
+
+      <!-- Achievements (Tasks only) -->
+      <!-- Achievements (Tasks only) -->
+      <div id="tab-achv" class="grid" style="display:none;">
+        <!-- Task 1 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +20 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Diversify your news: read about the same topic from three different sources.</p>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +30 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Fact‑check: choose one article and verify its claims using reliable sources.</p>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +15 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Detox break: take a 15‑minute break away from screens and practise mindful breathing.</p>
+        </div>
+
+        <!-- Task 4 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +25 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Mood reflection: after browsing, write down how the content made you feel.</p>
+        </div>
+
+        <!-- Task 5 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +20 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Spread positivity: engage with five uplifting posts and ignore negativity.</p>
+        </div>
+
+        <!-- Task 6 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +30 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Learn &amp; share: watch a short talk on media literacy and summarise it to a friend.</p>
+        </div>
+
+        <!-- Task 7 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +20 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Follow difference: follow two creators from different backgrounds or viewpoints.</p>
+        </div>
+
+        <!-- Task 8 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +35 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Platform balance: spend 20&nbsp;minutes on your main platform, then explore a new one for 10&nbsp;minutes.</p>
+        </div>
+
+        <!-- Task 9 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +30 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Spot manipulation: identify and bookmark three posts that use clickbait or emotional triggers.</p>
+        </div>
+
+        <!-- Task 10 -->
+        <div class="card" style="padding:16px;">
+          <strong><img src="coin.png" alt="Bubble" class="bubble-icon"> +15 Bubble Coin</strong>
+          <p style="margin:8px 0 0;color:var(--sub);font-size:14px;">Gratitude note: write a short note of gratitude after your session to boost your mood.</p>
+        </div>
+      </div>
+
+
+      <!-- Dress-up -->
+      <div id="tab-dress" class="grid" style="display:none;">
+        <div class="card" style="padding:16px;">
+          <h3 style="margin:0 0 14px;">Dress Bobo</h3>
+          <!-- Color palette: users can click to change Bobo's color.  Each
+               thumbnail uses a data-src attribute pointing to its file. -->
+          <div id="colorSelector" style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; justify-content:center;">
+            <img src="bubbly1.png" alt="Pink Bobo" class="color-option" data-src="bubbly1.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <img src="bubbly2.png" alt="Blue Bobo" class="color-option" data-src="bubbly2.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <img src="bubbly3.png" alt="Green Bobo" class="color-option" data-src="bubbly3.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <img src="bubbly4.png" alt="Purple Bobo" class="color-option" data-src="bubbly4.png" style="width:60px;height:60px;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+          </div>
+          <!-- Accessories list: click a button to overlay an accessory onto Bobo.
+               Limit to five accessories.  Each accessory PNG should include
+               transparency so it overlays correctly on the base color and face. -->
+          <h4 style="margin: 16px 0 8px; font-size: 16px;">Accessories</h4>
+          <div class="shop" id="accessoryList" style="grid-template-columns:repeat(2, 1fr);">
+            <div class="item">
+              <img src="acc1.png" alt="Accessory 1" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 1</div>
+              <button class="btn btn-primary useAcc" data-src="acc1.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc2.png" alt="Accessory 2" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 2</div>
+              <button class="btn btn-primary useAcc" data-src="acc2.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc3.png" alt="Accessory 3" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 3</div>
+              <button class="btn btn-primary useAcc" data-src="acc3.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc4.png" alt="Accessory 4" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 4</div>
+              <button class="btn btn-primary useAcc" data-src="acc4.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc5.png" alt="Accessory 5" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 5</div>
+              <button class="btn btn-primary useAcc" data-src="acc5.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc6.png" alt="Accessory 5" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 6</div>
+              <button class="btn btn-primary useAcc" data-src="acc6.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc7.png" alt="Accessory 5" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 7</div>
+              <button class="btn btn-primary useAcc" data-src="acc7.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="acc8.png" alt="Accessory 5" style="width:100%; border-radius:12px;">
+              <div class="price">Accessory 8</div>
+              <button class="btn btn-primary useAcc" data-src="acc8.png">Use</button>
+            </div>
+          </div>
+          <!-- Faces list: click to apply a face overlay on Bobo.  Limit to five faces. -->
+          <h4 style="margin: 20px 0 8px; font-size: 16px;">Faces</h4>
+          <div class="shop" id="faceList" style="grid-template-columns:repeat(2, 1fr);">
+            <div class="item">
+              <img src="face1.png" alt="Face 1" style="width:100%; border-radius:12px;">
+              <div class="price">Face 1</div>
+              <button class="btn btn-primary useFace" data-src="face1.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="face2.png" alt="Face 2" style="width:100%; border-radius:12px;">
+              <div class="price">Face 2</div>
+              <button class="btn btn-primary useFace" data-src="face2.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="face3.png" alt="Face 3" style="width:100%; border-radius:12px;">
+              <div class="price">Face 3</div>
+              <button class="btn btn-primary useFace" data-src="face3.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="face4.png" alt="Face 4" style="width:100%; border-radius:12px;">
+              <div class="price">Face 4</div>
+              <button class="btn btn-primary useFace" data-src="face4.png">Use</button>
+            </div>
+            <div class="item">
+              <img src="face5.png" alt="Face 5" style="width:100%; border-radius:12px;">
+              <div class="price">Face 5</div>
+              <button class="btn btn-primary useFace" data-src="face5.png">Use</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom tab bar with links -->
+    <nav class="tabbar">
+      <a class="tab active" href="main.html" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12l9-9 9 9"/>
+          <path d="M9 21V9h6v12"/>
+        </svg>
+        <span>Home</span>
+      </a>
+
+      <a class="tab" href="chat.html" title="Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+        </svg>
+        <span>Chat</span>
+      </a>
+
+      <a class="tab" href="piechart.html" title="Analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/>
+          <path d="M7 15l4-4 3 3 5-6"/>
+        </svg>
+        <span>Analytics</span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    // Segmented nav switching
+    const segBtns = document.querySelectorAll('.seg-btn');
+    const tabs = {
+      trips: document.getElementById('tab-trips'),
+      achv:  document.getElementById('tab-achv'),
+      dress: document.getElementById('tab-dress')
+    };
+    segBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        segBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const t = btn.dataset.tab;
+        Object.entries(tabs).forEach(([k, el]) => {
+          el.style.display = (k === t) ? 'grid' : 'none';
+        });
+      });
+    });
+
+    // Simple live timer and journey management
+    let journeyActive = false;
+    let startAt = null;
+    const timerEl = document.getElementById('liveTimer');
+    function fmt(n){ return String(n).padStart(2,'0'); }
+    function updateTimer(){
+      if(!journeyActive || !startAt) return;
+      const d = Math.floor((Date.now() - startAt) / 1000);
+      const h = Math.floor(d/3600), m = Math.floor((d%3600)/60), s = d % 60;
+      if(timerEl) timerEl.textContent = `Live · ${fmt(h)}:${fmt(m)}:${fmt(s)}`;
+    }
+    setInterval(updateTimer, 1000);
+
+    const startBtn = document.getElementById('startJourney');
+    startBtn.addEventListener('click', () => {
+      if(!journeyActive){
+        // begin a new journey
+        journeyActive = true;
+        startAt = Date.now();
+        // update button label
+        startBtn.textContent = 'Stop Journey';
+        // update ongoing card: icon to the current customised Bobo, status to Bubbling
+        const ongoingCard = document.querySelector('#tab-trips .trip');
+        if(ongoingCard){
+          const iconDiv = ongoingCard.querySelector('.icon');
+          if(iconDiv){
+            const baseSrc = boboBaseImg ? boboBaseImg.src : '';
+            const faceSrc = boboFaceImg ? boboFaceImg.src : '';
+            const accSrc  = boboAccImg  ? boboAccImg.src  : '';
+            let html = '<div style="position:relative;width:100%;height:100%;border-radius:inherit;overflow:hidden;">' +
+                       '<img src="' + baseSrc + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            if(faceSrc){
+              html += '<img src="' + faceSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            }
+            if(accSrc){
+              html += '<img src="' + accSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            }
+            html += '</div>';
+            iconDiv.innerHTML = html;
+          }
+          const statusDiv = ongoingCard.querySelector('.status');
+          if(statusDiv){
+            statusDiv.textContent = 'Bubbling';
+          }
+          const metaH4 = ongoingCard.querySelector('.meta h4');
+          if(metaH4){
+            metaH4.textContent = 'New Journey · Bobo';
+          }
+          // reset timer display
+          if(timerEl) timerEl.textContent = 'Live · 00:00:00';
+        }
+        updateTimer();
+      } else {
+        // stop current journey
+        journeyActive = false;
+        const endAt = Date.now();
+        const durationSec = Math.floor((endAt - startAt) / 1000);
+        const h = Math.floor(durationSec/3600), m = Math.floor((durationSec%3600)/60), s = durationSec%60;
+        const startDate = new Date(startAt);
+        const startDateStr = `${startDate.getFullYear()}/${String(startDate.getMonth()+1).padStart(2,'0')}/${String(startDate.getDate()).padStart(2,'0')}`;
+        const durationStr = `${fmt(h)}:${fmt(m)}:${fmt(s)}`;
+        // create a summary card
+        const tripsContainer = document.getElementById('tab-trips');
+        if(tripsContainer){
+          const newCard = document.createElement('div');
+          newCard.className = 'trip';
+          const baseSrc = boboBaseImg ? boboBaseImg.src : '';
+          const faceSrc = boboFaceImg ? boboFaceImg.src : '';
+          const accSrc  = boboAccImg  ? boboAccImg.src  : '';
+          let iconHtml = '<div style="position:relative;width:100%;height:100%;border-radius:inherit;overflow:hidden;">' +
+                          '<img src="' + baseSrc + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+          if(faceSrc){
+            iconHtml += '<img src="' + faceSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+          }
+          if(accSrc){
+            iconHtml += '<img src="' + accSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+          }
+          iconHtml += '</div>';
+          newCard.innerHTML =
+            '<div class="icon">' + iconHtml + '</div>' +
+            '<div class="meta">' +
+              '<h4>Bubbling Journey</h4>' +
+              '<p>' + startDateStr + ' · ' + durationStr + '</p>' +
+            '</div>' +
+            '<div class="status">Completed</div>';
+          tripsContainer.appendChild(newCard);
+        }
+        // reset ongoing card to idle
+        const ongoingCard = document.querySelector('#tab-trips .trip');
+        if(ongoingCard){
+          const iconDiv = ongoingCard.querySelector('.icon');
+          if(iconDiv){
+            const baseSrc = boboBaseImg ? boboBaseImg.src : '';
+            const faceSrc = boboFaceImg ? boboFaceImg.src : '';
+            const accSrc  = boboAccImg  ? boboAccImg.src  : '';
+            let html = '<div style="position:relative;width:100%;height:100%;border-radius:inherit;overflow:hidden;">' +
+                       '<img src="' + baseSrc + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            if(faceSrc){
+              html += '<img src="' + faceSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            }
+            if(accSrc){
+              html += '<img src="' + accSrc + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            }
+            html += '</div>';
+            iconDiv.innerHTML = html;
+          }
+          const statusDiv = ongoingCard.querySelector('.status');
+          if(statusDiv){
+            statusDiv.textContent = 'Idle';
+          }
+          const metaH4 = ongoingCard.querySelector('.meta h4');
+          if(metaH4){
+            metaH4.textContent = 'New Journey · Bobo';
+          }
+          if(timerEl) timerEl.textContent = 'Live · 00:00:00';
+        }
+        // reset button label
+        startBtn.textContent = 'Start Journey';
+        startAt = null;
+      }
+    });
+
+    // ---------------- Dress-up functionality ----------------
+    // Allow users to instantly change Bobo's color and apply accessories.
+    const boboBaseImg = document.getElementById('boboBase');
+    const boboAccImg  = document.getElementById('boboAcc');
+    const boboFaceImg = document.getElementById('boboFace');
+    // When a color thumbnail is clicked, update the base image.  We no longer
+    // clear the accessory or face so users can mix and match.
+    document.querySelectorAll('.color-option').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const src = thumb.getAttribute('data-src');
+        if (boboBaseImg) boboBaseImg.src = src;
+      });
+    });
+    // When an accessory's Use button is clicked, overlay the accessory on top of Bobo.
+    document.querySelectorAll('.useAcc').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const src = btn.getAttribute('data-src');
+        if (boboAccImg) boboAccImg.src = src;
+      });
+    });
+
+    // When a face's Use button is clicked, overlay the face on top of Bobo.
+    document.querySelectorAll('.useFace').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const src = btn.getAttribute('data-src');
+        if (boboFaceImg) boboFaceImg.src = src;
+      });
+    });
+  </script>
+</body>
+</html>

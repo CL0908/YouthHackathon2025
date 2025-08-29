@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Bubbly · Analytics</title>
+<style>
+  :root{
+    --blue:#FBE6AC;  /* soft yellow */
+    --pink:#FAEEE5;  /* light pink */
+    --lav:#FAEEE5;   /* same as pink per request */
+    --mint:#94DBF5;  /* cyan */
+    --peach:#FFADAD; /* salmon */
+    --ink:#20201f; --sub:#5c5b59; --card:#fff; --shadow:0 8px 28px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    color:var(--ink);
+    background:linear-gradient(160deg, var(--pink) 0%, #fff 40%, var(--blue) 100%);
+    min-height:100vh;
+  }
+  .phone{max-width:460px;margin:0 auto}
+
+  /* Top bar */
+  .topbar{position:sticky;top:0;z-index:5;backdrop-filter:blur(8px);
+    background:rgba(255,255,255,.6); padding:14px 16px; display:flex; align-items:center; gap:12px}
+  .logo{font-weight:800;font-size:18px;letter-spacing:.3px}
+  .spacer{flex:1}
+  .avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid rgba(0,0,0,.06)}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+
+  /* Card layout like mockup */
+  .card{background:var(--card); border-radius:26px; box-shadow:var(--shadow)}
+  .hero{margin:16px; padding:16px 16px 8px; position:relative}
+  .title{font-size:28px; font-weight:800; margin:4px 0 12px}
+  .row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+  .pill{background:#f6f6f6; border-radius:20px; padding:12px 10px; text-align:center}
+  .pill h3{margin:0; font-size:20px; font-weight:800}
+  .pill p{margin:4px 0 0; font-size:12px; color:var(--sub)}
+  .pill.yellow{background:var(--blue)}
+  .pill.pink{background:var(--pink);}
+
+  .big{display:grid; grid-template-columns:1fr auto; align-items:center; gap:12px; padding:16px 0}
+  .big .percent{font-size:48px; font-weight:900; line-height:1}
+  .big .desc{font-size:14px; color:var(--sub); margin-top:6px}
+  .badge{justify-self:end; background:#f7f7f7; border-radius:999px; padding:10px 14px; font-size:12px}
+
+  /* Chart area (bottom half in mock) */
+  .board{margin:0 16px 120px; padding:12px}
+  .canvasWrap{background:#fff; border-radius:22px; padding:14px; box-shadow:var(--shadow)}
+  canvas{width:100%; max-width:420px; aspect-ratio:1/1; touch-action:manipulation}
+  .legend{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px}
+  @media (max-width:400px){ .legend{grid-template-columns:1fr;} }
+  .legItem{display:flex; align-items:center; gap:8px; font-size:13px}
+  .sw{width:12px;height:12px;border-radius:50%}
+  .legItem small{margin-left:auto; color:#666}
+
+  /* Tooltip for slice tap */
+  .tooltip{position:fixed; left:50%; transform:translateX(-50%); bottom:90px; display:none;
+    padding:8px 10px; background:#ffffffee; border:1px solid #eee; border-radius:12px; box-shadow:var(--shadow);
+    font-size:12px; color:#333; z-index:6}
+
+  /* Bottom nav (same as other pages) */
+  .tabbar{position:fixed; left:0; right:0; bottom:0; background:#ffffffcc; backdrop-filter:blur(6px);
+    border-top:1px solid #eee; display:grid; grid-template-columns:repeat(3,1fr); padding:10px 8px; gap:8px}
+  .tab{display:grid; place-items:center; gap:4px; color:#5b5b5b; font-size:12px; text-decoration:none}
+  .tab.active{color:#0d3a66}
+  .tab svg{width:24px;height:24px}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="logo">BUBLENZ</div>
+      <div class="spacer"></div>
+      <div class="avatar"><img src="bobo.png" alt="Bobo"></div>
+    </div>
+
+    <!-- Mockup-style top card -->
+    <section class="card hero">
+      <div class="title">Analytics</div>
+      <div class="row">
+        <div class="pill yellow">
+          <h3 id="durVal">0</h3>
+          <p>Duration (min)</p>
+        </div>
+        <div class="pill pink">
+          <h3 id="compVal">0</h3>
+          <p>Completed</p>
+        </div>
+        <div class="pill" style="opacity:.25">
+          <h3>—</h3>
+          <p>&nbsp;</p>
+        </div>
+      </div>
+
+      <div class="big">
+        <div>
+          <div class="percent" id="topPercent">0%</div>
+          <div class="desc" id="topLabel">Dominant theme</div>
+        </div>
+        <div class="badge" id="badge">dominant</div>
+      </div>
+    </section>
+
+    <!-- Pie chart like the mock’s bottom area -->
+    <section class="board">
+      <div class="canvasWrap">
+        <canvas id="pie" width="420" height="420" aria-label="Theme distribution"></canvas>
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div style="text-align:center; margin:20px;">
+        <a href="sim.html" 
+          style="display:inline-block; padding:10px 20px; border-radius:999px;
+                  background:#FBE6AC; color:#000; font-weight:600; text-decoration:none;
+                  box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+          Try Simulation →
+        </a>
+      </div>
+    </section>
+
+    <div class="tooltip" id="tooltip">Theme · 0%</div>
+      
+
+    <!-- Bottom nav -->
+    <nav class="tabbar">
+      <a class="tab" href="main.html" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/>
+        </svg><span>Home</span>
+      </a>
+      <a class="tab" href="chat.html" title="Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+        </svg><span>Chat</span>
+      </a>
+      <a class="tab active" href="piechart.html" title="Analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>
+        </svg><span>Analytics</span>
+      </a>
+    </nav>
+  </div>
+
+<script>
+
+/*
+
+const sampleThemes = [
+  { label:"Education",  value:45, color:"#FFADAD" },
+  { label:"World",      value:22, color:"#FBE6AC" },
+  { label:"Tech/AI",    value:18, color:"#94DBF5" },
+  { label:"Wellness",   value:10, color:"#FAEEE5" },
+  { label:"Other",      value:5,  color:"#eee" }
+];
+
+const data = [
+  { label:"Education",  value:45, color:"#FFADAD" },
+  { label:"World",      value:22, color:"#FBE6AC" },
+  { label:"Tech/AI",    value:18, color:"#94DBF5" },
+  { label:"Wellness",   value:10, color:"#FAEEE5" },
+  { label:"Other",      value:5,  color:"#eee" }
+];
+const durationMin = 126;
+const completed   = 12;
+
+
+/* ---------- Populate header ---------- */
+document.getElementById('durVal').textContent = durationMin;
+document.getElementById('compVal').textContent = completed;
+
+const total = data.reduce((a,b)=>a+b.value,0);
+const top = data.slice().sort((a,b)=>b.value-a.value)[0] || {label:'—', value:0};
+document.getElementById('durVal').textContent = durationMin;
+document.getElementById('compVal').textContent = completed;
+document.getElementById('topPercent').textContent = `${top.value}%`;
+document.getElementById('topLabel').textContent   = top.label;
+document.getElementById('badge').textContent      = `${top.label}`;
+
+/* ---------- Hi‑DPI canvas ---------- */
+const canvas = document.getElementById('pie');
+const ctx = canvas.getContext('2d');
+function setupHiDpi(){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const { width, height } = canvas.getBoundingClientRect();
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+setupHiDpi();
+addEventListener('resize', setupHiDpi);
+
+/* ---------- Draw donut pie ---------- */
+let arcs = [];
+function drawPie(items){
+  arcs.length = 0;
+  const box = canvas.getBoundingClientRect();
+  const cx = box.width/2, cy = box.height/2;
+  const R = Math.min(cx, cy) - 10;
+  let start = -Math.PI/2;
+
+  // slices
+  items.forEach(it=>{
+    const slice = (it.value/total) * Math.PI*2;
+    const end = start + slice;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, start, end);
+    ctx.closePath();
+    ctx.fillStyle = it.color;
+    ctx.fill();
+
+    arcs.push({start, end, label:it.label, value:it.value, color:it.color});
+    start = end;
+  });
+
+  // hole
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.arc(cx, cy, R*0.56, 0, Math.PI*2); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // center label like the mock
+  ctx.fillStyle = '#000';
+  ctx.font = '800 22px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${top.value}%`, cx, cy-6);
+  ctx.font = '600 12px system-ui';
+  ctx.fillStyle = '#5b5b5b';
+  ctx.fillText(top.label, cx, cy+12);
+
+  // legend
+  const legend = document.getElementById('legend');
+  legend.innerHTML = items.map(d => `
+    <div class="legItem">
+      <span class="sw" style="background:${d.color}"></span>
+      <span>${d.label}</span>
+      <small>${d.value}%</small>
+    </div>
+  `).join('');
+}
+drawPie(data);
+
+/* ---------- Tap slice tooltip ---------- */
+const tip = document.getElementById('tooltip');
+let hideTimer;
+canvas.addEventListener('click', (e)=>{
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  const cx = rect.width/2, cy = rect.height/2;
+  const dx = x - cx, dy = y - cy;
+  const r = Math.hypot(dx,dy);
+  const R = Math.min(cx, cy) - 10;
+  const inner = R*0.56;
+  if (r < inner || r > R) return;
+
+  let ang = Math.atan2(dy, dx);
+  if (ang < -Math.PI/2) ang += 2*Math.PI;
+  ang = ang - (-Math.PI/2);
+  if (ang < 0) ang += 2*Math.PI;
+
+  for (const a of arcs){
+    let s = a.start - (-Math.PI/2); if (s < 0) s += 2*Math.PI;
+    let eA = a.end   - (-Math.PI/2); if (eA < 0) eA += 2*Math.PI;
+    if (ang >= s && ang <= eA){
+      tip.textContent = `${a.label} · ${a.value}%`;
+      tip.style.display = 'block';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(()=> tip.style.display='none', 1500);
+      break;
+    }
+  }
+});
+</script>
+<script>
+/**
+ * A simple demonstration of rendering a donut chart without any external
+ * dependencies.  We wait until the page has finished loading before
+ * performing any drawing so that the canvas has its final size and the
+ * elements exist in the DOM.  One fixed dataset is provided below for
+ * demo purposes, and the header (duration, completed, dominant theme)
+ * is populated based on that data.
+ */
+
+// Demo dataset – values add up to 100 so they can be treated as percentages.
+const demoData = [
+  { label: 'Education', value: 45, color: '#FFADAD' },
+  { label: 'World',     value: 22, color: '#FBE6AC' },
+  { label: 'Tech/AI',   value: 18, color: '#94DBF5' },
+  { label: 'Wellness',  value: 10, color: '#FAEEE5' },
+  { label: 'Other',     value:  5, color: '#DDDDDD' }
+];
+
+// Example metrics for the header.  In a real application these would
+// be populated with real analytics values.
+const demoDuration = 126;
+const demoCompleted   = 12;
+
+function initPieChart() {
+  const durEl = document.getElementById('durVal');
+  const compEl = document.getElementById('compVal');
+  if (durEl && compEl) {
+    durEl.textContent  = demoDuration;
+    compEl.textContent = demoCompleted;
+  }
+  const total = demoData.reduce((sum, d) => sum + d.value, 0);
+  const top   = demoData.slice().sort((a, b) => b.value - a.value)[0] || { label: '—', value: 0 };
+  const topPercentEl = document.getElementById('topPercent');
+  const topLabelEl   = document.getElementById('topLabel');
+  const badgeEl      = document.getElementById('badge');
+  if (topPercentEl) topPercentEl.textContent = `${top.value}%`;
+  if (topLabelEl)   topLabelEl.textContent   = top.label;
+  if (badgeEl)      badgeEl.textContent      = top.label;
+
+  const canvas = document.getElementById('pie');
+  if (!canvas) return;
+  const rect   = canvas.getBoundingClientRect();
+  const dpr    = Math.max(window.devicePixelRatio || 1, 1);
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.scale(dpr, dpr);
+
+  let startAngle = -Math.PI / 2;
+  const cx    = rect.width  / 2;
+  const cy    = rect.height / 2;
+  const radius = Math.min(cx, cy) - 10;
+
+  demoData.forEach(item => {
+    const endAngle = startAngle + (item.value / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = item.color;
+    ctx.fill();
+    startAngle = endAngle;
+  });
+
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.56, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  ctx.fillStyle = '#000000';
+  ctx.font      = '800 22px system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${top.value}%`, cx, cy - 6);
+  ctx.font = '600 12px system-ui';
+  ctx.fillStyle = '#5b5b5b';
+  ctx.fillText(top.label, cx, cy + 12);
+
+  const legend = document.getElementById('legend');
+  if (legend) {
+    legend.innerHTML = '';
+    demoData.forEach(item => {
+      const row   = document.createElement('div');
+      row.className = 'legItem';
+      const swatch = document.createElement('span');
+      swatch.className = 'sw';
+      swatch.style.background = item.color;
+      const text  = document.createElement('span');
+      text.textContent = item.label;
+      const pct   = document.createElement('small');
+      pct.textContent = `${item.value}%`;
+      row.appendChild(swatch);
+      row.appendChild(text);
+      row.appendChild(pct);
+      legend.appendChild(row);
+    });
+  }
+
+  let arcs = [];
+  let angleStart = -Math.PI / 2;
+  demoData.forEach(item => {
+    const angleEnd = angleStart + (item.value / total) * Math.PI * 2;
+    arcs.push({ start: angleStart, end: angleEnd, label: item.label, value: item.value });
+    angleStart = angleEnd;
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  let hideTimer;
+  canvas.addEventListener('click', ev => {
+    const bounds = canvas.getBoundingClientRect();
+    const x  = ev.clientX - bounds.left;
+    const y  = ev.clientY - bounds.top;
+    const dx = x - cx;
+    const dy = y - cy;
+    const dist = Math.hypot(dx, dy);
+    if (dist < radius * 0.56 || dist > radius) return;
+    let theta = Math.atan2(dy, dx);
+    if (theta < -Math.PI / 2) theta += Math.PI * 2;
+    theta -= -Math.PI / 2;
+    if (theta < 0) theta += Math.PI * 2;
+    arcs.forEach(arc => {
+      const s = arc.start - (-Math.PI / 2);
+      const e = arc.end   - (-Math.PI / 2);
+      let startA = s < 0 ? s + Math.PI * 2 : s;
+      let endA   = e < 0 ? e + Math.PI * 2 : e;
+      if (theta >= startA && theta <= endA) {
+        if (tooltip) {
+          tooltip.textContent = `${arc.label} · ${arc.value}%`;
+          tooltip.style.display = 'block';
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { tooltip.style.display = 'none'; }, 1500);
+        }
+      }
+    });
+  });
+}
+
+window.addEventListener('load', initPieChart);
+</script>
+</body>
+</html>
