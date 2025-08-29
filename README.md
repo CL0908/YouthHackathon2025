@@ -27,3 +27,26 @@ Instead of punishing screen time, Bublenz allows users to:
 git clone https://github.com/YourUser/YouthHackathon2025.git
 cd YouthHackathon2025
 pip install -r requirements.txt  # includes Flask, requests, nltk (optional)
+
+Running a Demo (no APIs)
+# Prepare a demo_posts.json with sample posts (see docs for format)
+python backend/tracker.py demo --file demo_posts.json
+python backend/nlp_topic.py
+# Open the visualization:
+open frontend/piechart.html
+open frontend/sim.html
+Live Tracking via API (Example: Reddit)
+export REDDIT_CLIENT_ID=...
+export REDDIT_CLIENT_SECRET=...
+export REDDIT_USERNAME=...
+export REDDIT_PASSWORD=...
+python backend/tracker.py api --provider reddit
+python backend/nlp_topic.py
+open frontend/piechart.html
+Ingest Server for Custom Input
+python backend/tracker.py ingest --port 7070
+# POST JSON with {id, platform, author_id, is_friend, text} to http://localhost:7070/ingest
+Starting Bobo Chat (Optional)
+export GOOGLE_API_KEY=...
+python backend/bubblechat.py serve --port 5050
+# Then open frontend/chat.html
