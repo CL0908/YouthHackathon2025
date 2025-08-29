@@ -77,7 +77,7 @@ sim.html reads session_topics.json and re-ranks the last 30-minute posts based o
 bubblechat.py proxies Gemini (Bobo) with a custom prompt focused on algorithm awareness and well-being.
 Gamified tasks reward BubbleCoins which unlock cosmetic items for Bobo.
 
-### 🤝 Contributors
+## Contributors
 Huge thanks to these wonderful people for making Bublenz possible!
 
 1. limenwee927@gmail.com
