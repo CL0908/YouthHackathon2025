@@ -2,7 +2,7 @@
 
 **Bublenz — Youth Media & Information Literacy + Mental Health**
 
-<div align="center"> <img src="assets/bobo.png" alt="Bublenz Logo" width="120" /> <h3>Algorithm Awareness + Media & Information Literacy</h3> <p> Built for <b>UNESCO Youth Hackathon 2025</b> • Empowering youth to <br/> <b>see their algorithm bubble</b>, reflect on their <b>digital diet</b>, and <br/> playfully simulate how feeds are ranked. </p> <a href="#getting-started">Getting Started</a> • <a href="#algorithm">Algorithm</a> • <a href="#roadmap">Roadmap</a> </div>
+<div align="center"> <img src="assets/bobo.png" alt="Bublenz Logo" width="120" /> <h3>Algorithm Awareness + Media & Information Literacy</h3> <p> Built for <b>UNESCO Youth Hackathon 2025</b> • Empowering youth to <br/> <b>see their algorithm bubble</b>, reflect on their <b>digital diet</b>, and <br/> playfully simulate how feeds are ranked. </p> <a href="#getting-started">Getting Started</a> • <a href="#algorithm">Algorithm</a> • <a href="#contributors">Contributors</a> </div>
 
 ## 🔥 About the Project
 
@@ -79,6 +79,7 @@ Gamified tasks reward BubbleCoins which unlock cosmetic items for Bobo.
 
 ### 🤝 Contributors
 Huge thanks to these wonderful people for making Bublenz possible!
-limenwee927@gmail.com
-qianwen12085@gmail.com
-teeh.e1230@gmail.com
+
+1. limenwee927@gmail.com
+2. qianwen12085@gmail.com
+3. teeh.e1230@gmail.com
