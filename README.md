@@ -28,19 +28,19 @@ git clone https://github.com/YourUser/YouthHackathon2025.git
 cd YouthHackathon2025
 pip install -r requirements.txt
 ```
-# Running a Demo (no APIs)
-# Prepare a demo_posts.json with sample posts (see docs for format)
+Running a Demo (no APIs)
+ - Prepare a demo_posts.json with sample posts (see docs for format)
 ```bash
 python backend/tracker.py demo --file demo_posts.json
 python backend/nlp_topic.py
 ```
 
-# Open the visualization:
+Open the visualization:
 ```bash
 open frontend/piechart.html
 open frontend/sim.html
 ```
-#Live Tracking via API (Example: Reddit)
+Live Tracking via API (Example: Reddit)
 ```bash
 export REDDIT_CLIENT_ID=...
 export REDDIT_CLIENT_SECRET=...
@@ -50,7 +50,7 @@ python backend/tracker.py api --provider reddit
 python backend/nlp_topic.py
 open frontend/piechart.html
 ```
-#Starting Bobo Chat (Optional)
+Starting Bobo Chat (Optional)
 ```bash
 export GOOGLE_API_KEY=...
 python backend/bubblechat.py serve --port 5050
@@ -79,8 +79,6 @@ Gamified tasks reward BubbleCoins which unlock cosmetic items for Bobo.
 
 ### 🤝 Contributors
 Huge thanks to these wonderful people for making Bublenz possible!
-Name	       Role	        Contribution
-Contributor   1	  |Full-Stack Dev	Backend & NLP
-Contributor   2	  |AI/ML Engineer	Topic Classifier & Gemini prompt
-Contributor   3	  |Frontend Designer	UI/UX & Simulation
-Contributor   4	  |Project Lead	Architecture & Documentation
+limenwee927@gmail.com
+qianwen12085@gmail.com
+teeh.e1230@gmail.com
