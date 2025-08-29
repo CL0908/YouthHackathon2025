@@ -60,21 +60,25 @@ python backend/bubblechat.py serve --port 5050
 ## Algorithm
 
 1. Data Collection
-tracker.py collects posts via social media APIs or local ingest.
+   
+**tracker.py** collects posts via social media APIs or local ingest.
 Stores an append-only log (session_raw.jsonl) and maintains a rolling 30-minute buffer (session_last30.json).
 
 2. NLP Topic Analysis
-nlp_topic.py tokenizes post text and assigns a topic (education, tech, entertainment, news, sports, science, health, politics, business, other).
+   
+**nlp_topic.py** tokenizes post text and assigns a topic (education, tech, entertainment, news, sports, science, health, politics, business, other).
 Computes novelty = 1 / (1 + hours since post) and friend indicator (0/1).
 Optional: computes sentiment for context but does not affect the pie chart.
 Outputs per-post features (session_topics.json) and aggregated counts (piechart.json).
 
 3. Visualization & Simulation
-piechart.html reads piechart.json and renders the topic mix as a pie chart.
-sim.html reads session_topics.json and re-ranks the last 30-minute posts based on sliders (diversity, novelty, friend and per-topic weights).
+   
+**piechart.html** reads piechart.json and renders the topic mix as a pie chart.
+**sim.html** reads session_topics.json and re-ranks the last 30-minute posts based on sliders (diversity, novelty, friend and per-topic weights).
 
 4. Emotional Support & Gamification
-bubblechat.py proxies Gemini (Bobo) with a custom prompt focused on algorithm awareness and well-being.
+   
+**bubblechat.py** proxies Gemini (Bobo) with a custom prompt focused on algorithm awareness and well-being.
 Gamified tasks reward BubbleCoins which unlock cosmetic items for Bobo.
 
 ## Contributors
