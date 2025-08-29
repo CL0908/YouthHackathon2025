@@ -13,3 +13,17 @@ Instead of punishing screen time, Bublenz allows users to:
 - **Visualize** their “information diet” with a pie chart.
 - **Simulate** feed ranking by adjusting sliders (diversity, novelty, friend weight) and see the impact instantly.
 - Get non-judgmental **emotional support** from the AI companion **Bobo** and have fun customizing it with **gamification rewards**.
+
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.10+
+- Optional API keys: Gemini (for Bobo), Reddit/YouTube/X (for live tracking)
+- Basic web browser (frontend is pure HTML/JS)
+
+### Installation
+```bash
+git clone https://github.com/YourUser/YouthHackathon2025.git
+cd YouthHackathon2025
+pip install -r requirements.txt  # includes Flask, requests, nltk (optional)
