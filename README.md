@@ -59,6 +59,7 @@ python backend/bubblechat.py serve --port 5050
 
 ## Algorithm
 <div align="center"><img src="assets/algorithm.png" alt="Pipeline" width="500" /> </div>
+
 1. Data Collection
    
 **tracker.py** collects posts via social media APIs or local ingest.
